@@ -4,12 +4,28 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.StringRes
 
 class MainActivity : AppCompatActivity() {
+    //Do tasks
 
     private lateinit var trueButton: Button
     private lateinit var falseButton: Button
+    private lateinit var nextButton: Button
+    private lateinit var questionTextView: TextView
+
+    private val questionBank = listOf(
+            Question(R.string.question_australia, true),
+            Question(R.string.question_oceans, true),
+            Question(R.string.question_mideast, false),
+            Question(R.string.question_africa, false),
+            Question(R.string.question_americas, true),
+            Question(R.string.question_asia, true)
+    )
+
+    private var currentIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,14 +33,23 @@ class MainActivity : AppCompatActivity() {
 
         trueButton = findViewById(R.id.trueButton)
         falseButton = findViewById(R.id.falseButton)
+        nextButton = findViewById(R.id.nextButton)
+        questionTextView = findViewById(R.id.questionTextView)
 
         trueButton.setOnClickListener {
-            toastBottom(R.string.correct_toast)
+            checkAnswer(true)
         }
 
         falseButton.setOnClickListener {
-            toastBottom(R.string.incorrect_toast)
+            checkAnswer(false)
         }
+
+        nextButton.setOnClickListener {
+            currentIndex = (currentIndex + 1) % questionBank.size
+            updateQuestion()
+        }
+
+        updateQuestion()
     }
 
     private fun toastTop(resId: Int) {
@@ -35,7 +60,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun toastBottom(resId: Int) {
+    private fun toast(@StringRes resId: Int) {
         Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateQuestion() {
+        val questionTextResId = questionBank[currentIndex].textResId
+        questionTextView.setText(questionTextResId)
+    }
+
+    private fun checkAnswer(userAnswer: Boolean) {
+        val correctAnswer = questionBank[currentIndex].answer
+        val messageResId = if(userAnswer == correctAnswer) {
+            R.string.correct_toast
+        } else {
+            R.string.incorrect_toast
+        }
+
+        toast(messageResId)
     }
 }
