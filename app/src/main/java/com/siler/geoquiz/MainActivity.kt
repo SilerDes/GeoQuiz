@@ -2,6 +2,7 @@ package com.siler.geoquiz
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.widget.Button
 import android.widget.ImageButton
@@ -9,8 +10,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 
+private const val TAG = "MainActivity"
+
 class MainActivity : AppCompatActivity() {
-    //Do tasks
 
     private lateinit var trueButton: Button
     private lateinit var falseButton: Button
@@ -28,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     )
 
     private var currentIndex = 0
+    private var correctAnswerCount = 0
+    private var inCorrectAnswerCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,10 +45,12 @@ class MainActivity : AppCompatActivity() {
 
         trueButton.setOnClickListener {
             checkAnswer(true)
+            checkResult()
         }
 
         falseButton.setOnClickListener {
             checkAnswer(false)
+            checkResult()
         }
 
         nextButton.setOnClickListener {
@@ -60,15 +66,51 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateQuestion()
+
+        Log.d(TAG, "onCreate(Bundle?)")
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        Log.d(TAG, "onStart()")
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        Log.d(TAG, "onResume()")
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        Log.d(TAG, "onPause()")
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        Log.d(TAG, "onStop()")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        Log.d(TAG, "onDestroy()")
     }
 
     private fun handleQuestionTransition(k: Int = 0) {
+
         if(k == 0) {
             currentIndex = (currentIndex + 1) % questionBank.size
         } else {
             currentIndex--
             if(currentIndex < 0) currentIndex = questionBank.size - 1
         }
+
+        checkEnableButton()
+
         updateQuestion()
     }
 
@@ -92,11 +134,29 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(userAnswer: Boolean) {
         val correctAnswer = questionBank[currentIndex].answer
         val messageResId = if(userAnswer == correctAnswer) {
+            correctAnswerCount++
             R.string.correct_toast
         } else {
+            inCorrectAnswerCount++
             R.string.incorrect_toast
         }
 
         toast(messageResId)
+        questionBank[currentIndex].isLocked = true
+        checkEnableButton()
+    }
+
+    private fun checkEnableButton() {
+        trueButton.isEnabled = !questionBank[currentIndex].isLocked
+        falseButton.isEnabled = !questionBank[currentIndex].isLocked
+    }
+
+    private fun checkResult() {
+        if(correctAnswerCount + inCorrectAnswerCount == questionBank.size) {
+            val message = "You done GeoQuiz with ${
+                ((correctAnswerCount.toDouble() / questionBank.size) * 100).toInt()
+            }% correct answers!"
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
     }
 }
