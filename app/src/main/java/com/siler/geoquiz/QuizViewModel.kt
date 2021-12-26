@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 class QuizViewModel : ViewModel() {
 
     var currentIndex = 0
+        set(value) {
+            if(value != field) field = value
+        }
 
     private val questionBank = listOf(
         Question(R.string.question_australia, true),
