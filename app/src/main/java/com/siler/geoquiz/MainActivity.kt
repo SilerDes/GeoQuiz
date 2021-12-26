@@ -9,8 +9,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
-
-private const val TAG = "MainActivity"
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,22 +19,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
 
-    private val questionBank = listOf(
-            Question(R.string.question_australia, true),
-            Question(R.string.question_oceans, true),
-            Question(R.string.question_mideast, false),
-            Question(R.string.question_africa, false),
-            Question(R.string.question_americas, true),
-            Question(R.string.question_asia, true)
-    )
-
-    private var currentIndex = 0
-    private var correctAnswerCount = 0
-    private var inCorrectAnswerCount = 0
+    private val quizViewModel: QuizViewModel by lazy {
+        ViewModelProvider(this).get(QuizViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        quizViewModel.currentIndex = savedInstanceState?.getInt(KEY_INDEX) ?: 0
 
         trueButton = findViewById(R.id.trueButton)
         falseButton = findViewById(R.id.falseButton)
@@ -70,6 +62,11 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate(Bundle?)")
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_INDEX, quizViewModel.currentIndex)
+    }
+
     override fun onStart() {
         super.onStart()
 
@@ -101,16 +98,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleQuestionTransition(k: Int = 0) {
-
-        if(k == 0) {
-            currentIndex = (currentIndex + 1) % questionBank.size
-        } else {
-            currentIndex--
-            if(currentIndex < 0) currentIndex = questionBank.size - 1
-        }
-
+        quizViewModel.move(k)
         checkEnableButton()
-
         updateQuestion()
     }
 
@@ -127,36 +116,42 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateQuestion() {
-        val questionTextResId = questionBank[currentIndex].textResId
+        val questionTextResId = quizViewModel.currentQuestionText
         questionTextView.setText(questionTextResId)
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        val correctAnswer = questionBank[currentIndex].answer
+        val correctAnswer = quizViewModel.currentQuestionAnswer
         val messageResId = if(userAnswer == correctAnswer) {
-            correctAnswerCount++
+            quizViewModel.correctAnswerCount++
             R.string.correct_toast
         } else {
-            inCorrectAnswerCount++
+            quizViewModel.inCorrectAnswerCount++
             R.string.incorrect_toast
         }
 
         toast(messageResId)
-        questionBank[currentIndex].isLocked = true
+        quizViewModel.setQuestionProperty(true)
         checkEnableButton()
     }
 
     private fun checkEnableButton() {
-        trueButton.isEnabled = !questionBank[currentIndex].isLocked
-        falseButton.isEnabled = !questionBank[currentIndex].isLocked
+        trueButton.isEnabled = quizViewModel.isLocked
+        falseButton.isEnabled = quizViewModel.isLocked
     }
 
     private fun checkResult() {
-        if(correctAnswerCount + inCorrectAnswerCount == questionBank.size) {
+        val size = quizViewModel.bankSize
+        if(quizViewModel.correctAnswerCount + quizViewModel.inCorrectAnswerCount == size) {
             val message = "You done GeoQuiz with ${
-                ((correctAnswerCount.toDouble() / questionBank.size) * 100).toInt()
+                ((quizViewModel.correctAnswerCount.toDouble() / size) * 100).toInt()
             }% correct answers!"
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
+        private const val KEY_INDEX = "index"
     }
 }
