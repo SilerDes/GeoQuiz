@@ -8,6 +8,7 @@ class QuizViewModel : ViewModel() {
         set(value) {
             if(value != field) field = value
         }
+    var isCheater = false
 
     private val questionBank = listOf(
         Question(R.string.question_australia, true),
@@ -29,6 +30,7 @@ class QuizViewModel : ViewModel() {
 
     var correctAnswerCount = 0
     var inCorrectAnswerCount = 0
+    var cheatsAnswerCount = 0
 
     fun move(k: Int = 0) {
         if(k == 0) {
@@ -37,6 +39,7 @@ class QuizViewModel : ViewModel() {
             currentIndex--
             if(currentIndex < 0) currentIndex = questionBank.size - 1
         }
+        isCheater = false
     }
 
     fun setQuestionProperty(property: Boolean) {

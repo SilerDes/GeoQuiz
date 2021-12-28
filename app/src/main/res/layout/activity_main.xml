@@ -34,6 +34,13 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/cheatButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/cheat_button" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,6 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:contentDescription="@string/description_back"
+            android:minWidth="48dp"
             android:padding="16dp"
             android:src="@drawable/arrow_left" />
 
@@ -53,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/description_next"
+            android:minWidth="48dp"
             android:padding="16dp"
             android:src="@drawable/arrow_right" />
 
