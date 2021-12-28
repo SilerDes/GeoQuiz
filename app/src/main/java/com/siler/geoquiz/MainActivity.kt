@@ -103,13 +103,13 @@ class MainActivity : AppCompatActivity() {
         updateQuestion()
     }
 
-    private fun toastTop(resId: Int) {
+/*    private fun toastTop(resId: Int) {
         val toast = Toast.makeText(this, resId, Toast.LENGTH_SHORT)
         toast.apply {
             setGravity(Gravity.TOP,0,0)
             show()
         }
-    }
+    }*/
 
     private fun toast(@StringRes resId: Int) {
         Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
