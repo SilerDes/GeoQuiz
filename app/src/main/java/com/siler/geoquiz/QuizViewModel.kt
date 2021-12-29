@@ -9,6 +9,7 @@ class QuizViewModel : ViewModel() {
             if(value != field) field = value
         }
     var isCheater = false
+    var hintCount = 3
 
     private val questionBank = listOf(
         Question(R.string.question_australia, true),

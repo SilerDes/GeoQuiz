@@ -1,7 +1,9 @@
 package com.siler.geoquiz
 
 import android.app.Activity
+import android.app.ActivityOptions
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -59,11 +61,18 @@ class MainActivity : AppCompatActivity() {
             handleQuestionTransition(-1)
         }
 
-        cheatButton.setOnClickListener {
+        cheatButton.setOnClickListener { view ->
             // start CheatActivity
             val answer = quizViewModel.currentQuestionAnswer
-            val intent = CheatActivity.newIntent(this, answer)
-            startActivityForResult(intent, REQUEST_CODE_CHEAT)
+            val intent = CheatActivity.newIntent(this, answer, quizViewModel.hintCount)
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val options = ActivityOptions
+                    .makeClipRevealAnimation(view, 0, 0, view.width, view.height)
+                startActivityForResult(intent, REQUEST_CODE_CHEAT, options.toBundle())
+            } else {
+                startActivityForResult(intent, REQUEST_CODE_CHEAT)
+            }
         }
 
         questionTextView.setOnClickListener {
@@ -71,8 +80,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateQuestion()
-
-        Log.d(TAG, "onCreate(Bundle?)")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -85,42 +92,14 @@ class MainActivity : AppCompatActivity() {
         if(requestCode == REQUEST_CODE_CHEAT) {
             quizViewModel.isCheater = data
                 ?.getBooleanExtra(CheatActivity.EXTRA_ANSWER_SHOWN, false) ?: false
+            quizViewModel.hintCount = data
+                ?.getIntExtra(CheatActivity.KEY_HINT_COUNT, 3) ?: 3
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt(KEY_INDEX, quizViewModel.currentIndex)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        Log.d(TAG, "onStart()")
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        Log.d(TAG, "onResume()")
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        Log.d(TAG, "onPause()")
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        Log.d(TAG, "onStop()")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        Log.d(TAG, "onDestroy()")
     }
 
     private fun handleQuestionTransition(k: Int = 0) {
